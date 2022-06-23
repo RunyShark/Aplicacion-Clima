@@ -9,7 +9,7 @@ const Busquedas = require("./models/busquedas");
 
 console.log(process.env);
 const main = async () => {
-  let opt = "";
+  let opt;
   const climaBusqueda = new Busquedas();
 
   do {
@@ -24,8 +24,10 @@ const main = async () => {
 
         //Selecion
         const id = await listarLugares(lugares);
-        const lugarSeleccionado = lugares.find((lugar) => lugar.id === id);
+        if (id === "0") continue;
 
+        const lugarSeleccionado = lugares.find((lugar) => lugar.id === id);
+        climaBusqueda.agregarHistorial(lugarSeleccionado.ciudad);
         const { ciudad, lat, lng } = lugarSeleccionado;
 
         //Clima
@@ -43,10 +45,13 @@ const main = async () => {
         console.log("Temperatura:".green, `${main.temp}`.blue);
         console.log("Mínima:".green, `${main.temp_min}`.blue);
         console.log("Máxima:".green, `${main.temp_max}`.blue);
-
         break;
 
-      default:
+      case 2:
+        climaBusqueda.historial.forEach((lugar, i) => {
+          const idx = `${i + 1}`.green;
+          console.log(`${idx} ${lugar}`);
+        });
         break;
     }
 

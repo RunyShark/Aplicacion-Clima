@@ -1,10 +1,12 @@
+const fs = require("fs");
 const axios = require("axios");
 
 class Busquedas {
-  historia = ["Tegucigalpa", "Madrid", "San José"];
-  constructor(historia) {
-    //? TODO: Leer DB si existe
-    this.historia = historia;
+  historial = [];
+
+  dbPath = "./db/database.json";
+  constructor() {
+    this.leerDB();
   }
   get getParamsMabox() {
     return {
@@ -40,6 +42,34 @@ class Busquedas {
       `https://api.openweathermap.org/data/2.5/weather?lat=${y}&lon=${x}&appid=${process.env.OPENWETHER_KEY}`
     );
     return data;
+  }
+  agregarHistorial(lugar = "") {
+    if (this.historial.includes(lugar.toLocaleLowerCase())) {
+      return;
+    }
+    this.historial = this.historial.splice(0, 5);
+
+    this.historial.unshift(lugar.toLocaleLowerCase());
+
+    // Grabar en DB
+    this.guardarDB();
+  }
+
+  guardarDB() {
+    const payload = {
+      historial: this.historial,
+    };
+
+    fs.writeFileSync(this.dbPath, JSON.stringify(payload));
+  }
+
+  leerDB() {
+    if (!fs.existsSync(this.dbPath)) return;
+
+    const info = fs.readFileSync(this.dbPath, { encoding: "utf-8" });
+    const data = JSON.parse(info);
+
+    this.historial = data.historial;
   }
 }
 
